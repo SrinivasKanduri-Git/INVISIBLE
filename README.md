@@ -73,23 +73,22 @@ Layer 1 fires automatically when relevant. Layer 2 emits silent notes. Layer 3 r
 
 (15 entries — `code-scanner` is cross-cutting; routing surface still ≤14 domains.)
 
-## 4. Install in 3 steps
+## 4. Install in one command
 
-1. Clone the skillset:
-   ```
-   git clone https://github.com/SrinivasKanduri-Git/INVISIBLE.git ~/.claude/invisible-skillset
-   ```
-2. Symlink the skill sets your agent reads:
-   ```
-   ln -s ~/.claude/invisible-skillset/layer1-safeguards ~/.claude/skills/invisible-layer1
-   ln -s ~/.claude/invisible-skillset/layer2-advisors  ~/.claude/skills/invisible-layer2
-   ln -s ~/.claude/invisible-skillset/layer3-max-performance ~/.claude/skills/invisible-layer3
-   ln -s ~/.claude/invisible-skillset/meta             ~/.claude/skills/invisible-meta
-   cp ~/.claude/invisible-skillset/CLAUDE_TEMPLATE.md  <your-project>/CLAUDE.md
-   ```
-3. Edit `CLAUDE.md` section A (stack, tenancy, vendors) so the DECIDER scores correctly. Sections B/C/D auto-fill from corrections over time.
+```bash
+curl -fsSL https://raw.githubusercontent.com/SrinivasKanduri-Git/INVISIBLE/main/install.sh | bash
+```
 
-Full instructions in `INSTALL.md`. Uninstall in `UNINSTALL.md`.
+The installer is idempotent:
+- Clones (or updates) `~/.claude/invisible-skillset/`.
+- Appends a marker-gated INVISIBLE block to `~/.claude/CLAUDE.md` (never overwrites — coexists with caveman, graphify, etc.).
+- Registers `/invisible` as a plugin in `~/.claude/settings.json`.
+- Creates per-project state at `~/.claude/invisible/<project-hash>/`.
+- Copies the 25-line `CLAUDE_TEMPLATE.md` to `<project>/CLAUDE.md` only if missing.
+
+Fill in 3 fields (**Name**, **Stack**, **Purpose**) in your project's `CLAUDE.md`. Domain rules, exceptions, and patterns fill in over time from corrections.
+
+Full details in `INSTALL.md`. Uninstall: `./uninstall.sh` (see `UNINSTALL.md`).
 
 ## 5. A real example walkthrough
 
@@ -286,16 +285,13 @@ Full per-repo reports: `tests/dogfood/results/{maybe-finance-maybe,elie222-inbox
 
 ## 15. Uninstall
 
-```
-rm ~/.claude/skills/invisible-layer1
-rm ~/.claude/skills/invisible-layer2
-rm ~/.claude/skills/invisible-layer3
-rm ~/.claude/skills/invisible-meta
-rm -rf ~/.claude/invisible
-# remove invisible_enabled and section A/B/C lines from your project CLAUDE.md
+```bash
+~/.claude/invisible-skillset/uninstall.sh
 ```
 
-Full uninstall instructions in `UNINSTALL.md`.
+Prompts before destructive removals. Strips the loader block from `~/.claude/CLAUDE.md`, removes `invisible@invisible` from `settings.json`, and optionally deletes `~/.claude/invisible-skillset/` and per-project state. caveman + graphify registrations untouched.
+
+Full details in `UNINSTALL.md`.
 
 ## 16. Help me get better
 

@@ -1,54 +1,54 @@
 # INSTALL — INVISIBLE
 
-3 steps. ~2 minutes. No network calls required.
+One command. Idempotent. Safe to re-run.
 
-## 1. Get the skillset
-
-Clone or download:
+## Quick install
 
 ```bash
-git clone https://github.com/SrinivasKanduri-Git/INVISIBLE.git ~/.claude/invisible-skillset
+curl -fsSL https://raw.githubusercontent.com/SrinivasKanduri-Git/INVISIBLE/main/install.sh | bash
 ```
 
-Then symlink each layer into your agent's skill directory:
+Or, if already cloned somewhere:
 
 ```bash
-ln -s ~/.claude/invisible-skillset/layer1-safeguards      ~/.claude/skills/invisible-layer1
-ln -s ~/.claude/invisible-skillset/layer2-advisors        ~/.claude/skills/invisible-layer2
-ln -s ~/.claude/invisible-skillset/layer3-max-performance ~/.claude/skills/invisible-layer3
-ln -s ~/.claude/invisible-skillset/meta                   ~/.claude/skills/invisible-meta
+./install.sh                       # current dir = project to register
+./install.sh /path/to/your-project # specify project dir
 ```
 
-(Other agents: place under the agent's skill-discovery path. INVISIBLE's loader is filesystem-driven; no plugin manifest needed.)
+## What it does
 
-(Other agents: place under the agent's skill-discovery path. INVISIBLE's loader is filesystem-driven; no plugin manifest needed.)
+1. Clones (or updates) the skillset to `~/.claude/invisible-skillset/`.
+2. Appends a marker-gated INVISIBLE loader block to `~/.claude/CLAUDE.md` — **never overwrites** existing content. Coexists with caveman, graphify, etc.
+3. Registers `/invisible` as a plugin in `~/.claude/settings.json` (`enabledPlugins` + `extraKnownMarketplaces`).
+4. Creates per-project state dir at `~/.claude/invisible/<project-hash>/` (12-char sha1/shasum/md5 fallback).
+5. Copies `CLAUDE_TEMPLATE.md` to `<project>/CLAUDE.md` only if missing.
 
-## 2. Initialize project state
+## Verify
 
-From inside your project root:
+Start a new Claude Code session in the project. Ask:
 
-```bash
-mkdir -p ~/.claude/invisible/$(pwd | shasum | cut -c1-12)
-cp ~/.claude/invisible-skillset/CLAUDE_TEMPLATE.md ./CLAUDE.md
-```
+> Which INVISIBLE skills are active?
 
-Edit `CLAUDE.md` sections A–F. Stack will auto-detect on first turn via [[stack-adapter]].
+Expected: DECIDER state for the (empty) turn — typically `[]` with a stack-adapter note. `/invisible status` returns the same.
 
-## 3. Verify
+## Project CLAUDE.md
 
-Start a Claude Code session in the project. Ask:
+After install, fill in 3 fields in `<project>/CLAUDE.md`: **Name**, **Stack**, **Purpose**. Domain rules, exceptions, patterns, and landmines fill in over time from corrections.
 
-> What INVISIBLE skills are loaded right now?
+## Requirements
 
-Expected reply lists DECIDER decisions for the (empty) turn — typically `[]` with `considered: []` and a stack-adapter note.
-
-If you see "DECIDER not found" — step 1 path is wrong.
-If you see "CLAUDE.md missing sections" — re-run step 2.
+- `bash`, `git`
+- `node` (used to JSON-patch `settings.json` — script falls back to manual instructions if absent)
+- One of `sha1sum` / `shasum` / `md5sum` (auto-detected per OS)
 
 ## Telemetry
 
-Off by default. INVISIBLE will ask once on first turn whether to enable anonymous trip/miss telemetry. Decline is fine; circuit-breaker still works locally.
+Off by default. Circuit-breaker still works locally.
 
 ## Uninstall
+
+```bash
+./uninstall.sh
+```
 
 See [UNINSTALL.md](./UNINSTALL.md).

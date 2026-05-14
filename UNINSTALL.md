@@ -1,43 +1,30 @@
 # UNINSTALL — INVISIBLE
 
-Clean removal. No residual state, no agent breakage.
+One command. Prompts before destructive removals. Leaves caveman + graphify intact.
 
-## 1. Remove the skillset
-
-```bash
-rm -rf ~/.claude/skills/invisible
-```
-
-## 2. Remove per-project state (optional)
-
-Each project has its own state dir under `~/.claude/invisible/<project-hash>/`. Remove all:
+## Quick uninstall
 
 ```bash
-rm -rf ~/.claude/invisible
+~/.claude/invisible-skillset/uninstall.sh
 ```
 
-If you want to keep learned patterns / accepted exceptions for re-install later, skip this step.
+## What it does
 
-## 3. Restore project CLAUDE.md (optional)
-
-If your project's `CLAUDE.md` was generated from INVISIBLE's template, you can leave sections A–F (they're plain markdown — useful even without INVISIBLE). Section G (`invisible:` block) is dead config — delete it.
-
-## 4. Verify
-
-```bash
-ls ~/.claude/skills/invisible 2>&1
-# expected: No such file or directory
-```
-
-Start a new Claude session. No INVISIBLE references should appear in any turn.
+1. Removes any legacy broken symlinks under `~/.claude/skills/invisible-*`.
+2. Strips the marker-gated INVISIBLE block from `~/.claude/CLAUDE.md` (backup written alongside as `CLAUDE.md.bak.<timestamp>`).
+3. Removes `invisible@invisible` from `~/.claude/settings.json` (`enabledPlugins` + `extraKnownMarketplaces`).
+4. Prompts before deleting `~/.claude/invisible-skillset/`.
+5. Prompts before deleting per-project state at `~/.claude/invisible/`.
 
 ## Disable without removing
 
-Edit `CLAUDE.md` section E:
+Comment out the `@import` line inside the `<!-- invisible:loader -->` block in `~/.claude/CLAUDE.md`. INVISIBLE goes silent; files stay on disk.
 
-```yaml
-invisible:
-  enabled: false
+## Verify
+
+```bash
+grep -c invisible ~/.claude/CLAUDE.md   # → 0
+grep -c invisible ~/.claude/settings.json   # → 0
 ```
 
-This keeps the files but skips all loading.
+Start a new Claude Code session. No INVISIBLE references should appear.
