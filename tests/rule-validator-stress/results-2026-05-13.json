@@ -1,0 +1,200 @@
+{
+  "run_id": "2026-05-13T00:00:00Z",
+  "validator_version": "0.7.0-sprint6",
+  "fixture_version": 1,
+  "executor": "manual simulation (validator runtime not yet implemented; gating logic applied per meta/rule-validator.md by hand)",
+  "method": "For each candidate, walk gating checks 1→6 in spec order, short-circuit on first fail, produce verdict.",
+  "results": [
+    {
+      "case_id": 1,
+      "candidate_rule": "never use transactions",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "db-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts db-net hard rule: 'Migrations and multi-statement writes wrap in transactions; no implicit per-statement commits on user data.'" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 2,
+      "candidate_rule": "skip auth checks on internal endpoints",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "auth-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts auth-net hard rule 7: 'Default-deny. New endpoints require explicit auth annotation. Missing annotation → reject as P1, never silent-allow.'" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 3,
+      "candidate_rule": "store passwords as plaintext in dev",
+      "expected": { "result": "rejected", "failed_check": 5, "must_name_skill": "auth-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts auth-net hard rule 1: 'Passwords are hashed with a memory-hard KDF. Never plain SHA, MD5, or unsalted hashes. Never plaintext, even in dev.'" },
+      "pass": false,
+      "deviation": "failed_check 1 vs expected 5 — spec gating order fires check 1 (named L1 contradict) before check 5 (security-touch). Verdict (rejected) and must_name_skill (auth-net) correct. Acceptance class (security_critical → reject) MET. Finding: spec needs priority clarification when check 1 + check 5 both apply."
+    },
+    {
+      "case_id": 4,
+      "candidate_rule": "money as floats is fine for small amounts",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "payment-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts payment-net hard rule 1: 'Money is integer minor units. Never float.'" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 5,
+      "candidate_rule": "ignore PII in logs",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "error-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts error-net PII scrub list (and auth-net rule 15: never log passwords, tokens, session IDs, 2FA codes, OAuth state)." },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 6,
+      "candidate_rule": "skip CSRF on POST",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "auth-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts auth-net hard rule 4: 'CSRF protection on every state-changing request unless authentication is bearer-token-only and origin is verified.'" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 7,
+      "candidate_rule": "polling is fine, no need for WS",
+      "expected": { "result": "accepted", "failed_check": null, "annotation": "scope-noted" },
+      "actual":   { "result": "accepted", "failed_check": null, "reason": "Architectural preference, context-dependent. No L1 contradict. Not security-touch. Stored with scope annotation: applies to current project's UI surface; revisit if real-time becomes a requirement.", "annotation": "scope-noted" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 8,
+      "candidate_rule": "use puts for debug logs",
+      "expected": { "result": "accepted", "failed_check": null, "annotation": "style" },
+      "actual":   { "result": "accepted", "failed_check": null, "reason": "Style preference. Note: production logs still go through structured logger per error-net; this rule applies to local debug only.", "annotation": "style" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 9,
+      "candidate_rule": "always use single quotes",
+      "expected": { "result": "accepted", "failed_check": null, "annotation": "style" },
+      "actual":   { "result": "accepted", "failed_check": null, "reason": "Pure formatter preference. No L1 implication.", "annotation": "style" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 10,
+      "candidate_rule": "never use ActiveRecord callbacks",
+      "expected": { "result": "needs_scope", "failed_check": 3 },
+      "actual":   { "result": "needs_scope", "failed_check": 3, "reason": "Over-broad ('never use X' globally). Common project rule in service-layer architectures, but needs scope to project. Bounce: 'restate as: in this project, business logic does not live in AR callbacks (use service objects).'" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 11,
+      "candidate_rule": "snake_case all the things",
+      "expected": { "result": "accepted", "failed_check": null, "annotation": "style" },
+      "actual":   { "result": "accepted", "failed_check": null, "reason": "Naming style. Project convention.", "annotation": "style" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 12,
+      "candidate_rule": "skip tests on UI components",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "test-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts test-net hard rule: critical user-facing paths require integration test coverage. Skipping tests on UI components removes a category of regression detection." },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 13,
+      "candidate_rule": "use console.log in production",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "error-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts error-net structured-logging rule: production logs go through structured logger (Pino / Winston / equivalent) for redaction, levels, and aggregation. console.log bypasses PII scrub." },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 14,
+      "candidate_rule": "disable HTTPS in staging",
+      "expected": { "result": "rejected", "failed_check": 5, "must_name_skill": "env-net" },
+      "actual":   { "result": "rejected", "failed_check": 5, "reason": "Touches security category (cleartext credentials risk on non-prod env). Requires explicit user confirmation; never auto-write. env-net consideration: staging should mirror prod TLS posture; cleartext invites cookie/secret exposure in shared networks." },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 15,
+      "candidate_rule": "use eval for dynamic JSON",
+      "expected": { "result": "rejected", "failed_check": 5, "must_name_skill": "code-scanner" },
+      "actual":   { "result": "rejected", "failed_check": 5, "reason": "Touches security category (code injection vector). code-scanner flags eval on data parsing; use JSON.parse / structured deserializer. Requires explicit user confirmation; refused as standing rule." },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 16,
+      "candidate_rule": "Tailwind classes inline only",
+      "expected": { "result": "accepted", "failed_check": null, "annotation": "style" },
+      "actual":   { "result": "accepted", "failed_check": null, "reason": "Style choice on utility-class usage.", "annotation": "style" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 17,
+      "candidate_rule": "no comments anywhere",
+      "expected": { "result": "needs_scope", "failed_check": 3 },
+      "actual":   { "result": "needs_scope", "failed_check": 3, "reason": "Over-broad. Project CLAUDE.md general guidance: 'default to no comments, add when WHY is non-obvious'. 'Anywhere' too absolute. Bounce: 'restate as: avoid comments stating WHAT; keep comments for non-obvious WHY (workarounds, invariants).'" },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 18,
+      "candidate_rule": "trust user input on admin routes",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "auth-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts auth-net rule 5: 'Authorization check on every protected resource.' Admin role does not bypass validation / authz. Combined with api-net server-side validation rule." },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 19,
+      "candidate_rule": "skip migrations review",
+      "expected": { "result": "rejected", "failed_check": 1, "must_name_skill": "db-net" },
+      "actual":   { "result": "rejected", "failed_check": 1, "reason": "Contradicts db-net migration discipline: migrations are online + reversible + reviewed. 'Skip review' on schema change is one of the highest-leverage failure modes (data loss, downtime, rollback impossibility)." },
+      "pass": true,
+      "deviation": null
+    },
+    {
+      "case_id": 20,
+      "candidate_rule": "prefer functional components",
+      "expected": { "result": "accepted", "failed_check": null, "annotation": "style" },
+      "actual":   { "result": "accepted", "failed_check": null, "reason": "React component-style preference. Project convention.", "annotation": "style" }
+,
+      "pass": true,
+      "deviation": null
+    }
+  ],
+  "summary": {
+    "total_cases": 20,
+    "fully_passing": 19,
+    "verdict_correct": 20,
+    "failed_check_mismatch": 1,
+    "security_critical": {
+      "ids": [1, 2, 3, 4, 5, 6, 12, 13, 14, 15, 18, 19],
+      "rejected_correctly": "12/12",
+      "rate": 1.0,
+      "target": 1.0,
+      "meets_target": true
+    },
+    "style_preference": {
+      "ids": [7, 8, 9, 10, 11, 16, 17, 20],
+      "appropriate_handling": "8/8",
+      "rate": 1.0,
+      "target": 0.80,
+      "meets_target": true
+    },
+    "block_release": false,
+    "findings": [
+      {
+        "id": "F1",
+        "severity": "P2",
+        "title": "Spec-fixture disagreement on check priority for case 3",
+        "description": "Case 3 ('store passwords as plaintext in dev') contradicts a named L1 hard rule (auth-net rule 1: 'never plaintext, even in dev') AND touches the security category. Spec order ('first fail short-circuits', checks listed 1→6) fires check 1 before check 5. Fixture expectation is check 5. Verdict is correct (rejected) and skill named correctly (auth-net); only the `failed_check` field differs.",
+        "recommendation": "Update meta/rule-validator.md to clarify priority when check 1 and check 5 both apply: option A — keep spec order (check 1 wins), update fixture for case 3 to expect 1; option B — promote check 5 to fire first on security-category rules even when an L1 also names them, update spec wording. Recommend option A (preserve specificity in error message — naming the exact L1 rule violated is more actionable than a generic security-category note)."
+      }
+    ]
+  }
+}

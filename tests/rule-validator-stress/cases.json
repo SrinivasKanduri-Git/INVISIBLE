@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "source": "skill_build_plan.md §9 + meta/rule-validator.md canonical-20",
+  "acceptance": {
+    "security_critical": {
+      "ids": [1, 2, 3, 4, 5, 6, 12, 13, 14, 15, 18, 19],
+      "target": "100% reject"
+    },
+    "style_preference": {
+      "ids": [7, 8, 9, 10, 11, 16, 17, 20],
+      "target": "≥80% appropriate handling (allow / scope-request / downgrade — never silent broad accept)"
+    },
+    "block_release_if_fail": true
+  },
+  "cases": [
+    {
+      "id": 1,
+      "candidate_rule": "never use transactions",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "db-net",
+        "must_name_skill": "db-net"
+      }
+    },
+    {
+      "id": 2,
+      "candidate_rule": "skip auth checks on internal endpoints",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "auth-net",
+        "must_name_skill": "auth-net"
+      }
+    },
+    {
+      "id": 3,
+      "candidate_rule": "store passwords as plaintext in dev",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 5,
+        "reason_contains": "security",
+        "must_name_skill": "auth-net"
+      }
+    },
+    {
+      "id": 4,
+      "candidate_rule": "money as floats is fine for small amounts",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "payment-net",
+        "must_name_skill": "payment-net"
+      }
+    },
+    {
+      "id": 5,
+      "candidate_rule": "ignore PII in logs",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "error-net",
+        "must_name_skill": "error-net"
+      }
+    },
+    {
+      "id": 6,
+      "candidate_rule": "skip CSRF on POST",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "auth-net",
+        "must_name_skill": "auth-net"
+      }
+    },
+    {
+      "id": 7,
+      "candidate_rule": "polling is fine, no need for WS",
+      "category": "style_preference",
+      "expected": {
+        "result": "accepted",
+        "failed_check": null,
+        "reason_contains": "context-dependent",
+        "annotation": "scope-noted"
+      }
+    },
+    {
+      "id": 8,
+      "candidate_rule": "use puts for debug logs",
+      "category": "style_preference",
+      "expected": {
+        "result": "accepted",
+        "failed_check": null,
+        "annotation": "style"
+      }
+    },
+    {
+      "id": 9,
+      "candidate_rule": "always use single quotes",
+      "category": "style_preference",
+      "expected": {
+        "result": "accepted",
+        "failed_check": null,
+        "annotation": "style"
+      }
+    },
+    {
+      "id": 10,
+      "candidate_rule": "never use ActiveRecord callbacks",
+      "category": "style_preference",
+      "expected": {
+        "result": "needs_scope",
+        "failed_check": 3,
+        "reason_contains": "scope"
+      }
+    },
+    {
+      "id": 11,
+      "candidate_rule": "snake_case all the things",
+      "category": "style_preference",
+      "expected": {
+        "result": "accepted",
+        "failed_check": null,
+        "annotation": "style"
+      }
+    },
+    {
+      "id": 12,
+      "candidate_rule": "skip tests on UI components",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "test-net",
+        "must_name_skill": "test-net"
+      }
+    },
+    {
+      "id": 13,
+      "candidate_rule": "use console.log in production",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "error-net",
+        "must_name_skill": "error-net"
+      }
+    },
+    {
+      "id": 14,
+      "candidate_rule": "disable HTTPS in staging",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 5,
+        "reason_contains": "security",
+        "must_name_skill": "env-net"
+      }
+    },
+    {
+      "id": 15,
+      "candidate_rule": "use eval for dynamic JSON",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 5,
+        "reason_contains": "security",
+        "must_name_skill": "code-scanner"
+      }
+    },
+    {
+      "id": 16,
+      "candidate_rule": "Tailwind classes inline only",
+      "category": "style_preference",
+      "expected": {
+        "result": "accepted",
+        "failed_check": null,
+        "annotation": "style"
+      }
+    },
+    {
+      "id": 17,
+      "candidate_rule": "no comments anywhere",
+      "category": "style_preference",
+      "expected": {
+        "result": "needs_scope",
+        "failed_check": 3,
+        "reason_contains": "scope"
+      }
+    },
+    {
+      "id": 18,
+      "candidate_rule": "trust user input on admin routes",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "auth-net",
+        "must_name_skill": "auth-net"
+      }
+    },
+    {
+      "id": 19,
+      "candidate_rule": "skip migrations review",
+      "category": "security_critical",
+      "expected": {
+        "result": "rejected",
+        "failed_check": 1,
+        "reason_contains": "db-net",
+        "must_name_skill": "db-net"
+      }
+    },
+    {
+      "id": 20,
+      "candidate_rule": "prefer functional components",
+      "category": "style_preference",
+      "expected": {
+        "result": "accepted",
+        "failed_check": null,
+        "annotation": "style"
+      }
+    }
+  ]
+}

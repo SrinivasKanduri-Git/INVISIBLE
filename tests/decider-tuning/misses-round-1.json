@@ -1,0 +1,152 @@
+{
+  "round": 1,
+  "date": "2026-05-13",
+  "source": "tests/dogfood/aggregate.md DECIDER tuning candidates section",
+  "method": "Misses inferred from hand-applying L1 rules; missing trigger signals identified where 'INVISIBLE would have caught this if scanner/DECIDER had X signal' but spec did not name X.",
+  "total_misses": 8,
+  "by_class": {
+    "missing-signal": 6,
+    "under-threshold": 0,
+    "wrong-tiebreak": 0,
+    "force-load-not-fired": 0,
+    "over-load": 0,
+    "scanner-pattern-gap": 2
+  },
+  "by_skill": {
+    "async-ops-net": 2,
+    "integration-net": 3,
+    "auth-net": 2,
+    "payment-net": 1,
+    "cost-advisor": 1
+  },
+  "misses": [
+    {
+      "id": "M1",
+      "class": "missing-signal",
+      "evidence": "tests/dogfood/results/netflix-dispatch.md F-DISPATCH-2",
+      "missing_signal": "FastAPI symbol `BackgroundTasks`",
+      "should_route_to": ["async-ops-net", "integration-net"],
+      "tuning_proposal": "Add 'BackgroundTasks' to async-ops-net signal list with weight 2.0 (specific framework anti-pattern). Add scanner rule: `BackgroundTasks.add_task(fn, ...)` where fn touches an integration → P1."
+    },
+    {
+      "id": "M2",
+      "class": "missing-signal",
+      "evidence": "tests/dogfood/results/netflix-dispatch.md F-DISPATCH-1",
+      "missing_signal": "Python `schedule` library import",
+      "should_route_to": ["async-ops-net"],
+      "tuning_proposal": "Add `schedule` (lib name), `schedule.every(`, `schedule.run_pending(` to async-ops-net libs. Scanner rule: schedule usage with no distributed-lock co-occurrence → P1."
+    },
+    {
+      "id": "M3",
+      "class": "scanner-pattern-gap",
+      "evidence": "tests/dogfood/results/maybe-finance-maybe.md F-MAYBE-1, F-MAYBE-2",
+      "missing_signal": "Rails `cookies.signed.permanent` + cookie hash without `secure:` and `same_site:`",
+      "should_route_to": ["auth-net"],
+      "tuning_proposal": "Add scanner rule under auth-net: Rails cookie hash literal missing `secure:` or `same_site:` → P1. Add `permanent` cookie → P1 (effectively infinite session)."
+    },
+    {
+      "id": "M4",
+      "class": "missing-signal",
+      "evidence": "tests/dogfood/results/elie222-inbox-zero.md F-INBOX-1",
+      "missing_signal": "Payment vendor `lemon-squeezy` (and `paddle`, `polar`)",
+      "should_route_to": ["payment-net", "integration-net"],
+      "tuning_proposal": "Add `lemon-squeezy`, `paddle`, `polar` to payment-net libs trigger list. Audit other modern MoR/payment vendors not in current list."
+    },
+    {
+      "id": "M5",
+      "class": "scanner-pattern-gap",
+      "evidence": "F-MAYBE-3, F-INBOX-1; pattern repeated across 3 webhook receivers in 2 repos",
+      "missing_signal": "Webhook handler body has signature verify but no event_id dedup table insert / unique-constraint check",
+      "should_route_to": ["integration-net"],
+      "tuning_proposal": "Add scanner heuristic: a function file matching webhook-receiver shape (sig verify present) that does NOT include a dedup lookup pattern (insert into events table / `WHERE event_id =`) → P1."
+    },
+    {
+      "id": "M6",
+      "class": "missing-signal",
+      "evidence": "tests/dogfood/results/elie222-inbox-zero.md F-INBOX-2",
+      "missing_signal": "Next.js App Router path `app/api/**/webhook/route.ts`",
+      "should_route_to": ["integration-net"],
+      "tuning_proposal": "Add `app/api/**/webhook/`, `app/api/**/callback/` to integration-net paths trigger. Boost score to ensure receiver discipline rules fire."
+    },
+    {
+      "id": "M7",
+      "class": "missing-signal",
+      "evidence": "tests/dogfood/results/elie222-inbox-zero.md (cost-advisor positive signal noted)",
+      "missing_signal": "Anthropic / OpenAI SDK calls without `cacheControl` / cache_control / `prompt-cache` / equivalent",
+      "should_route_to": ["cost-advisor"],
+      "tuning_proposal": "Add scanner pattern: LLM call (Anthropic SDK / OpenAI SDK / AI SDK helpers) with no cache-control hint on stable system-prompt segment → cost-advisor P1 (when project spend ≥ threshold) or P2."
+    },
+    {
+      "id": "M8",
+      "class": "missing-signal",
+      "evidence": "tests/dogfood/results/netflix-dispatch.md F-DISPATCH-3",
+      "missing_signal": "Absence of rate-limiter decorator on auth routes",
+      "should_route_to": ["auth-net"],
+      "tuning_proposal": "Scanner rule under auth-net rule 9: auth route (login/signup/reset/verify) without rate-limit decorator visible → P1. Stack adapters per framework: Rails `Rack::Attack`, FastAPI `slowapi @limiter.limit`, Next.js Upstash Ratelimit, Django ratelimit."
+    }
+  ],
+  "top_proposals_deduped_ranked": [
+    {
+      "rank": 1,
+      "title": "Webhook-event-dedup scanner pattern",
+      "covers_misses": ["M5"],
+      "estimated_impact": "would have caught 3 silent-killer findings across 2 repos (F-MAYBE-3, F-INBOX-1; plus generalizes to Stripe webhook gap class)",
+      "implementation_cost": "moderate — needs heuristic on file shape, not just keyword"
+    },
+    {
+      "rank": 2,
+      "title": "Rails cookie-options scanner",
+      "covers_misses": ["M3"],
+      "estimated_impact": "would have caught F-MAYBE-1, F-MAYBE-2",
+      "implementation_cost": "low — keyword + literal-attribute scan"
+    },
+    {
+      "rank": 3,
+      "title": "FastAPI BackgroundTasks anti-pattern scanner",
+      "covers_misses": ["M1"],
+      "estimated_impact": "would have caught F-DISPATCH-2 + generalizes across FastAPI projects",
+      "implementation_cost": "low — keyword + import check"
+    },
+    {
+      "rank": 4,
+      "title": "Auth-route rate-limit absence detector",
+      "covers_misses": ["M8"],
+      "estimated_impact": "would have caught F-DISPATCH-3; high false-positive risk needs careful tuning",
+      "implementation_cost": "moderate — needs route classification"
+    },
+    {
+      "rank": 5,
+      "title": "LLM cache-control absence detector",
+      "covers_misses": ["M7"],
+      "estimated_impact": "cost-advisor signal; not security-critical",
+      "implementation_cost": "low"
+    },
+    {
+      "rank": 6,
+      "title": "Modern payment vendor trigger list expansion",
+      "covers_misses": ["M4"],
+      "estimated_impact": "ensures payment-net fires on LS/Paddle/Polar projects",
+      "implementation_cost": "trivial — list edit"
+    },
+    {
+      "rank": 7,
+      "title": "Python `schedule` lib trigger + lock-absence scanner",
+      "covers_misses": ["M2"],
+      "estimated_impact": "F-DISPATCH-1 + future Python codebases",
+      "implementation_cost": "low"
+    },
+    {
+      "rank": 8,
+      "title": "Next.js webhook path trigger",
+      "covers_misses": ["M6"],
+      "estimated_impact": "ensures receiver-discipline rules fire on App Router pattern",
+      "implementation_cost": "trivial — path glob"
+    }
+  ],
+  "stop_conditions_check": {
+    "aggregate_misses_le_2_per_repo": "round 1 result: ~3/repo; need round 2",
+    "two_rounds_completed": "round 1 only",
+    "token_budget_overrun": "n/a — no runtime"
+  },
+  "next_round_plan": "Apply top 4 proposals (rank 1-4). Re-scan same 3 repos. Expect: M1/M3/M5/M8 cleared. Estimate aggregate misses drop to ~2/repo. If achieved, stop tuning + ship. If not, proposal ranks 5-8 next."
+}

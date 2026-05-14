@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invisible.local/preferences.schema.json",
+  "title": "INVISIBLE preferences",
+  "description": "Per-project preferences. Lives at ~/.claude/invisible/<project-hash>/preferences.json. Validated on load by corruption-handler.",
+  "type": "object",
+  "required": ["schema_version", "project_hash", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "project_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{12}$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "telemetry": {
+      "type": "string",
+      "enum": ["off", "anonymous", "asked-once"],
+      "default": "asked-once"
+    },
+    "layer3_enabled": {
+      "type": "array",
+      "description": "L3 skills user opted into. Empty by default.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "deep-codebase-mapper",
+          "full-spec-rewriter",
+          "prod-readiness-audit",
+          "prd-writer",
+          "security-auditor",
+          "refactor-architect",
+          "perf-deep-dive",
+          "trd-writer",
+          "architecture-designer",
+          "openapi-generator",
+          "runbook-generator",
+          "data-model-designer",
+          "onboarding-doc-generator"
+        ]
+      },
+      "default": []
+    },
+    "skill_overrides": {
+      "type": "object",
+      "description": "Per-skill enable/disable. Skills not listed use their SKILL.md default (enabled).",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["enabled", "disabled"]
+      },
+      "default": {}
+    },
+    "advisor_caps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "p1_max_per_turn": {"type": "integer", "minimum": 0, "default": 99},
+        "p2_max_per_turn": {"type": "integer", "minimum": 0, "default": 3},
+        "p3_max_per_turn": {"type": "integer", "minimum": 0, "default": 2}
+      }
+    },
+    "circuit_breaker": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["armed", "degraded", "tripped"],
+          "default": "armed"
+        },
+        "since": {"type": "string", "format": "date-time"}
+      }
+    },
+    "pattern_scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "token_budget_per_turn": {"type": "integer", "minimum": 0, "default": 1000},
+        "cache_ttl_days": {"type": "integer", "minimum": 1, "default": 30}
+      }
+    },
+    "self_learner": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean", "default": true},
+        "auto_write_to_claude_md": {"type": "boolean", "default": false},
+        "min_confidence_to_keep": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.2}
+      }
+    },
+    "interop": {
+      "type": "object",
+      "description": "Detected/configured peer skillsets and their pinned version ranges.",
+      "additionalProperties": {"type": "string"},
+      "default": {}
+    },
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "detected": {"type": "string"},
+        "override": {"type": ["string", "null"], "default": null}
+      }
+    }
+  }
+}
