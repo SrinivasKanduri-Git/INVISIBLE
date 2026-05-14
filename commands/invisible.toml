@@ -1,27 +1,2 @@
-description = "INVISIBLE safeguard skillset. Usage: /invisible <subcommand> [args]. Subcommands: status, map, spec, prd, audit, refactor, perf, trd, design, openapi, runbook, data-model, onboarding, validate-rule, refresh-patterns."
-prompt = """
-User invoked: /invisible {{args}}
-
-Read the INVISIBLE loader at ~/.claude/invisible-skillset/meta/invisible-loader.md if not already in context.
-
-Dispatch by first token of args:
-
-- (empty) | status → report DECIDER state, loaded skills, circuit-breaker, layer3_enabled list. Read meta/circuit-breaker.md if needed.
-- map → Read ~/.claude/invisible-skillset/layer3-max-performance/_core5/codebase-map/SKILL.md and run it.
-- spec → Read layer3-max-performance/_core5/spec-generator/SKILL.md and run it.
-- prd → Read layer3-max-performance/_extended8/prd-generator/SKILL.md and run it.
-- audit prod-readiness → Read layer3-max-performance/_core5/prod-readiness-auditor/SKILL.md and run it.
-- audit security → Read layer3-max-performance/_core5/security-auditor/SKILL.md and run it.
-- refactor → Read layer3-max-performance/_core5/refactor-planner/SKILL.md and run it.
-- perf → Read layer3-max-performance/_extended8/perf-investigator/SKILL.md and run it.
-- trd → Read layer3-max-performance/_extended8/trd-generator/SKILL.md and run it.
-- design → Read layer3-max-performance/_extended8/design-doc-generator/SKILL.md and run it.
-- openapi → Read layer3-max-performance/_extended8/openapi-generator/SKILL.md and run it.
-- runbook → Read layer3-max-performance/_extended8/runbook-generator/SKILL.md and run it.
-- data-model → Read layer3-max-performance/_extended8/data-model-designer/SKILL.md and run it.
-- onboarding → Read layer3-max-performance/_extended8/onboarding-doc-generator/SKILL.md and run it.
-- validate-rule → Read meta/rule-validator.md and run dry-run on the quoted rule text in args.
-- refresh-patterns → Read meta/pattern-scan-budget.md and rebuild ~/.claude/invisible/<project-hash>/discovered-patterns.json.
-
-Honour the L3 cap: ≤1 active per turn. If a path doesn't exist, report it and list the available L3 skills from layer3-max-performance/. Apply caveman tone only if caveman mode is active.
-"""
+description = "INVISIBLE safeguard skillset. Usage: /invisible <subcommand> [args]. Subcommands: status, map, spec, prd, audit prod-readiness, audit security, refactor, perf, trd, design, openapi, runbook, data-model, onboarding, validate-rule, refresh-patterns."
+prompt = "User invoked /invisible {{args}}. Read ~/.claude/invisible-skillset/meta/invisible-loader.md if not already in context, then dispatch on the first arg token. status (or empty args): report DECIDER state, loaded skills, circuit-breaker, layer3_enabled list. map: Read layer3-max-performance/_core5/codebase-map/SKILL.md and run it. spec: Read layer3-max-performance/_core5/spec-generator/SKILL.md and run it. prd: Read layer3-max-performance/_extended8/prd-generator/SKILL.md. audit: dispatch to prod-readiness-auditor or security-auditor in _core5/ based on second arg. refactor: _core5/refactor-planner/SKILL.md. perf: _extended8/perf-investigator/SKILL.md. trd, design, openapi, runbook, data-model, onboarding: corresponding _extended8/<name>-generator (or -designer / -doc-generator) SKILL.md. validate-rule: meta/rule-validator.md dry-run on the quoted rule text. refresh-patterns: meta/pattern-scan-budget.md rebuild of ~/.claude/invisible/<project-hash>/discovered-patterns.json. Honour L3 cap: ≤1 active per turn. If a target path is missing, list available L3 skills from layer3-max-performance/ and stop."

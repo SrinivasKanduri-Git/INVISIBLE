@@ -1,0 +1,8 @@
+{
+  "name": "invisible",
+  "description": "INVISIBLE safeguard skillset for AI coding agents. Catches silent killers before they ship. /invisible <subcommand>: status, map, spec, prd, audit, refactor, perf, trd, design, openapi, runbook, data-model, onboarding, validate-rule, refresh-patterns.",
+  "author": {
+    "name": "Srinivas Kanduri",
+    "url": "https://github.com/SrinivasKanduri-Git"
+  }
+}
