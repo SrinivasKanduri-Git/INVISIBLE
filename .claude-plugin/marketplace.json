@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "invisible",
+  "description": "Safeguard skillset for AI coding agents. Catches silent killers before they ship.",
+  "owner": {
+    "name": "Srinivas Kanduri",
+    "url": "https://github.com/SrinivasKanduri-Git"
+  },
+  "plugins": [
+    {
+      "name": "invisible",
+      "description": "INVISIBLE safeguard skillset. 14 L1 + 6 L2 + 13 L3 skills. /invisible <subcommand>.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}
