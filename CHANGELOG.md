@@ -6,6 +6,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ## [Unreleased]
 
+(Tracking continues under §Planned for v0.8 below the 0.7.1 entry.)
+
+## [0.7.1] — 2026-05-15
+
+Patch release. Fixes the loader pipeline so DECIDER + L1/L2 actually run, and adds the missing `/invisible:init` bootstrap command.
+
+### Fixed
+- **Loader memory import** (`install.sh`, `~/.claude/CLAUDE.md` written block): wrote `@import <path>` which Claude Code does not recognize, so the loader file was never inlined into context and DECIDER routing never fired. Corrected to `@<path>` per Claude Code memory-import syntax.
+- **Plugin slash command format**: `commands/invisible.toml` was silently ignored — Claude Code plugin commands require Markdown with YAML frontmatter. Replaced with `commands/invisible.md` using `$ARGUMENTS` and `${CLAUDE_PLUGIN_ROOT}`.
+- **uninstall.sh**: also nukes `~/.claude/plugins/cache/invisible`, `~/.claude/plugins/marketplaces/invisible`, and strips `invisible@invisible` from `installed_plugins.json` + `known_marketplaces.json`. Previously these were stranded after uninstall and blocked clean reinstall.
+
+### Added
+- `commands/init.md` → `/invisible:init` seeds `<project>/CLAUDE.md` from `CLAUDE_TEMPLATE.md` and best-effort fills the `## Project` Stack field from `package.json` / `Gemfile` / `pyproject.toml` / `go.mod` / `Cargo.toml` / `pom.xml`.
+
+### Docs
+- README §4 install flow now includes the post-script Claude Code plugin install step.
+- README §8 commands cheat sheet uses plugin-namespaced form (`/invisible:invisible <sub>`, `/invisible:init`).
+- `meta/invisible-loader.md` reflects plugin namespacing + corrected memory-import phrasing.
+- `UNINSTALL.md` reflects expanded uninstall.sh behavior.
+
 ### Planned for v0.8
 - Build executable runtime: validator + DECIDER scorer + code-scanner (currently spec-only).
 - Apply DECIDER tuning round-1 proposals (see `tests/decider-tuning/misses-round-1.json`): webhook-event-dedup scanner, Rails cookie-options scanner, FastAPI BackgroundTasks detector, auth-route rate-limit detector.

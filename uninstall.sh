@@ -47,6 +47,27 @@ NODE
   fi
 fi
 
+# ── Strip plugin install records + nuke plugin cache + marketplace clone ─────
+PLUGINS_DIR="$HOME/.claude/plugins"
+if command -v node >/dev/null 2>&1; then
+  for f in "$PLUGINS_DIR/installed_plugins.json" "$PLUGINS_DIR/known_marketplaces.json"; do
+    if [ -f "$f" ] && grep -q '"invisible' "$f"; then
+      FILE_PATH="$f" node <<'NODE'
+const fs = require('fs');
+const p = process.env.FILE_PATH;
+let j = {};
+try { j = JSON.parse(fs.readFileSync(p, 'utf8') || '{}'); } catch (e) { j = {}; }
+if (j.plugins && j.plugins['invisible@invisible']) delete j.plugins['invisible@invisible'];
+if (j.invisible) delete j.invisible;
+fs.writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
+NODE
+      echo "✓ Stripped invisible from $f"
+    fi
+  done
+fi
+[ -d "$PLUGINS_DIR/cache/invisible" ] && rm -rf "$PLUGINS_DIR/cache/invisible" && echo "✓ Removed $PLUGINS_DIR/cache/invisible"
+[ -d "$PLUGINS_DIR/marketplaces/invisible" ] && rm -rf "$PLUGINS_DIR/marketplaces/invisible" && echo "✓ Removed $PLUGINS_DIR/marketplaces/invisible"
+
 # ── Optional: remove skillset dir/symlink ───────────────────────────────────
 if [ -e "$SKILLSET_DIR" ]; then
   read -r -p "Remove skillset at $SKILLSET_DIR? [y/N] " REMOVE

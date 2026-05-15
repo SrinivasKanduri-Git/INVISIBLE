@@ -6,7 +6,7 @@ trigger: /invisible
 
 # INVISIBLE — Active
 
-INVISIBLE is a 3-layer safeguard skillset for AI coding agents. Loaded every session via `@import` in `~/.claude/CLAUDE.md`. Full design: `~/.claude/invisible-skillset/skill_build_plan.md` (v6). Routing logic: `~/.claude/invisible-skillset/DECIDER.md`.
+INVISIBLE is a 3-layer safeguard skillset for AI coding agents. Loaded every session via `@<path>` memory import in `~/.claude/CLAUDE.md`. Full design: `~/.claude/invisible-skillset/skill_build_plan.md` (v6). Routing logic: `~/.claude/invisible-skillset/DECIDER.md`.
 
 ## How to operate each turn
 
@@ -71,21 +71,26 @@ security > user-facing > infrastructure. Hard cap: 4 skills loaded per turn.
 
 scaling-advisor · ux-advisor · cost-advisor · future-self · architecture-advisor · integration-advisor. ≤5 notes/turn, P1 exempt.
 
-## /invisible commands (L3, opt-in)
+## /invisible commands (plugin-namespaced)
 
-Read the skill from `layer3-max-performance/` on invocation:
+In Claude Code, plugin slash commands carry the `/<plugin>:<cmd>` prefix. INVISIBLE ships two top-level commands:
 
-- `/invisible map` — codebase map
-- `/invisible spec` — engineer spec from brief
-- `/invisible prd` — product doc
-- `/invisible audit prod-readiness`
-- `/invisible audit security`
-- `/invisible refactor`
-- `/invisible perf`
-- `/invisible trd` · `/invisible design` · `/invisible openapi` · `/invisible runbook` · `/invisible data-model` · `/invisible onboarding`
-- `/invisible status` — show DECIDER state, loaded skills, circuit-breaker
-- `/invisible validate-rule "<text>"` — dry-run rule-validator
-- `/invisible refresh-patterns` — rebuild pattern cache
+- `/invisible:invisible <subcommand>` — dispatcher for L3 + meta below
+- `/invisible:init` — seed project CLAUDE.md from CLAUDE_TEMPLATE.md (bootstrap)
+
+L3 subcommands (read the skill from `layer3-max-performance/` on invocation, ≤1 active per turn):
+
+- `/invisible:invisible map` — codebase map
+- `/invisible:invisible spec` — engineer spec from brief
+- `/invisible:invisible prd` — product doc
+- `/invisible:invisible audit prod-readiness`
+- `/invisible:invisible audit security`
+- `/invisible:invisible refactor`
+- `/invisible:invisible perf`
+- `/invisible:invisible trd` · `design` · `openapi` · `runbook` · `data-model` · `onboarding`
+- `/invisible:invisible status` — show DECIDER state, loaded skills, circuit-breaker
+- `/invisible:invisible validate-rule "<text>"` — dry-run rule-validator
+- `/invisible:invisible refresh-patterns` — rebuild pattern cache
 
 ## Circuit breaker states
 

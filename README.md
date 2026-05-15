@@ -2,7 +2,7 @@
 
 > Safeguard skillset for AI coding agents. Stops demo-grade code from shipping. Autoloads in 3 layers.
 
-**Status**: **v0.7.0 (developer-preview)** — released 2026-05-14.
+**Status**: **v0.7.1 (developer-preview)** — released 2026-05-15. Patches loader pipeline so DECIDER + L1/L2 actually run. See `CHANGELOG.md`.
 
 All architectural pieces shipped: 14 L1 + 6 L2 + 13 L3 + 9 meta files + DECIDER + tests harness (see [Repo map](#repo-map)). Sprint 6 round-1 dogfood (3 real repos) + rule-validator stress test (20 cases) complete and **PASS**.
 
@@ -81,10 +81,18 @@ curl -fsSL https://raw.githubusercontent.com/SrinivasKanduri-Git/INVISIBLE/main/
 
 The installer is idempotent:
 - Clones (or updates) `~/.claude/invisible-skillset/`.
-- Appends a marker-gated INVISIBLE block to `~/.claude/CLAUDE.md` (never overwrites — coexists with caveman, graphify, etc.).
-- Registers `/invisible` as a plugin in `~/.claude/settings.json`.
+- Appends a marker-gated INVISIBLE loader block (`@<path>` memory import) to `~/.claude/CLAUDE.md`. Never overwrites — coexists with caveman, graphify, etc.
+- Registers the `invisible` plugin + marketplace in `~/.claude/settings.json`.
 - Creates per-project state at `~/.claude/invisible/<project-hash>/`.
 - Copies the 25-line `CLAUDE_TEMPLATE.md` to `<project>/CLAUDE.md` only if missing.
+
+Then, inside Claude Code, install the plugin once:
+
+```
+/plugin marketplace add SrinivasKanduri-Git/INVISIBLE
+/plugin install invisible@invisible
+/reload-plugins
+```
 
 Fill in 3 fields (**Name**, **Stack**, **Purpose**) in your project's `CLAUDE.md`. Domain rules, exceptions, and patterns fill in over time from corrections.
 
@@ -172,24 +180,28 @@ Each L3 ≤1 active per turn. Heavy passes; meant for milestones, not every turn
 
 ## 8. Commands cheat sheet
 
-```
-/invisible map              # codebase map
-/invisible spec             # engineer spec from brief
-/invisible prd              # product doc
-/invisible audit prod-readiness
-/invisible audit security
-/invisible refactor
-/invisible perf
-/invisible trd
-/invisible design
-/invisible openapi
-/invisible runbook
-/invisible data-model
-/invisible onboarding
+Claude Code plugin commands are namespaced as `/<plugin>:<command>`. INVISIBLE ships two:
 
-/invisible validate-rule "<text>"   # dry-run rule-validator
-/invisible refresh-patterns         # rebuild pattern cache
-/invisible status                   # which layers loaded, circuit-breaker state
+```
+/invisible:init                              # seed project CLAUDE.md from template
+
+/invisible:invisible map                     # codebase map
+/invisible:invisible spec                    # engineer spec from brief
+/invisible:invisible prd                     # product doc
+/invisible:invisible audit prod-readiness
+/invisible:invisible audit security
+/invisible:invisible refactor
+/invisible:invisible perf
+/invisible:invisible trd
+/invisible:invisible design
+/invisible:invisible openapi
+/invisible:invisible runbook
+/invisible:invisible data-model
+/invisible:invisible onboarding
+
+/invisible:invisible validate-rule "<text>"  # dry-run rule-validator
+/invisible:invisible refresh-patterns        # rebuild pattern cache
+/invisible:invisible status                  # which layers loaded, circuit-breaker state
 ```
 
 ## 9. What I learn from you + the validator that keeps me safe from myself
