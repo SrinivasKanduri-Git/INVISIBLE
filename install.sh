@@ -52,7 +52,7 @@ if ! grep -qF "$MARKER_OPEN" "$GLOBAL_CLAUDE"; then
 $MARKER_OPEN
 ## INVISIBLE
 Safeguard skillset. Loaded every session. Catches silent killers before they ship.
-@import $SKILLSET_DIR/meta/invisible-loader.md
+@$SKILLSET_DIR/meta/invisible-loader.md
 $MARKER_CLOSE
 BLOCK
   echo "✓ Registered INVISIBLE block in $GLOBAL_CLAUDE"
